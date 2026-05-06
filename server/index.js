@@ -69,7 +69,6 @@ const socketHandler = require('./socket');
 const app    = express();
 const server = http.createServer(app);
 const allowedOrigins = [
-  process.env.CLIENT_URL || 'http://localhost:5173',
   'https://vox-campus-final-7ah3.vercel.app'
 ];
 const io = new Server(server, {
