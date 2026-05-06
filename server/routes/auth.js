@@ -85,6 +85,7 @@ router.post('/register/send-otp', async (req, res) => {
     if (!cls) return res.status(404).json({ error: 'Class not found' });
 
     const otp = genOTP();
+    await sendOTP(email, otp, name);
     await User.findOneAndUpdate(
       { rollNo: rollNo.toUpperCase() },
       {
@@ -95,7 +96,6 @@ router.post('/register/send-otp', async (req, res) => {
       },
       { upsert: true, new: true }
     );
-    await sendOTP(email, otp, name);
     res.json({ message: 'OTP sent to your email' });
   } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to send OTP' }); }
 });
