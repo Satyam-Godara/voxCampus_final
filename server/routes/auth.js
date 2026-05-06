@@ -101,7 +101,7 @@ router.post('/register/send-otp', async (req, res) => {
     );
     console.log("user added");
     res.json({ message: 'OTP sent to your email' });
-  } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to send OTP' }); }
+  } catch (err) { console.error("SEND OTP ERROR:", err); res.status(500).json({ error: err.message || 'Failed to send OTP' }); }
 });
 
 // ── Student: verify OTP ────────────────────────────────────────────────────
