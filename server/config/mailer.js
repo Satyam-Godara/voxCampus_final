@@ -20,7 +20,6 @@ const transporter = nodemailer.createTransport({
   connectionTimeout: 60000,
   greetingTimeout: 60000,
   socketTimeout: 60000,
-  console.log("transporter created");
 });
 const sendOTP = async (to, otp, name) => {
   console.log(`SendOTP function is called for name : ${name} otp ${otp} to ${to}`);
