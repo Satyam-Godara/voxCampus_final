@@ -21,8 +21,9 @@ function StudentRegister({ classes, onBack }) {
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
 
   const sendOtp = async e => {
+    console.log("SendOtp called from frontend");
     e.preventDefault(); setErr(''); setLoading(true);
-    try { await api.post('/auth/register/send-otp', form); setStep(2); }
+    try { await api.post('/auth/register/send-otp', form); setStep(2); console.log("frontend sendOtp post done");}
     catch (e) { setErr(e.response?.data?.error || 'Failed to send OTP'); }
     finally { setLoading(false); }
   };
