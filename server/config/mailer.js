@@ -48,7 +48,7 @@ const sendOTP = async (to, otp, name) => {
 // });
   // await transporter.sendMail({
   await resend.emails.send({
-    from: 'VoxCampus <noreply@voxcampus.edu>',
+    from: 'onboarding@resend.dev',
     to,
     subject: 'VoxCampus — Your OTP for registration',
     html: `
