@@ -19,13 +19,7 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: "voxcampus15@gmail.com",
     pass: "hyko kxaw wvti ltan",
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
+  }
 });
 
 // const transporter = nodemailer.createTransport({
