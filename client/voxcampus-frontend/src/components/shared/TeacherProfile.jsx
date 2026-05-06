@@ -816,13 +816,19 @@ function ScreenShare({ channelId, channelName, socket }) {
   const startSharing = async () => {
     setError('');
     try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({ video:{ displaySurface: "monitor", cursor:'always' }, audio:false });
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video:true, audio:false });
       // const ss = await navigator.mediaDevices.getDisplayMedia({video:true});
       // console.log("STREAM :",ss);
       // console.log("TRACk :",ss.getVideoTracks()[0]);
       streamRef.current = stream;
-      if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.play().catch(()=>{}); }
-
+      // videoRef.current = stream;
+      
+      console.log(stream);
+      console.log(streamRef);
+      console.log(videoRef);
+      // if (videoRef.current) { videoRef.current.srcObject = stream;videoRef.current.play().catch(()=>{});}
+      console.log(videoRef);
+      
       // If user clicks browser native "Stop sharing"
       stream.getVideoTracks()[0].addEventListener('ended', stopSharing);
 
@@ -882,6 +888,18 @@ function ScreenShare({ channelId, channelName, socket }) {
   }, [socket, channelId]);
 
   // Cleanup on unmount
+  useEffect(() => {
+
+  if (sharing && videoRef.current && streamRef.current) {
+
+    videoRef.current.srcObject = streamRef.current;
+
+    videoRef.current.play()
+      .then(() => console.log("Teacher preview playing"))
+      .catch(err => console.log(err));
+  }
+
+}, [sharing]);
   useEffect(() => () => { if (streamRef.current) stopSharing(); }, []);
 
   return (
@@ -909,7 +927,7 @@ function ScreenShare({ channelId, channelName, socket }) {
       {error && <div style={{ fontSize:12, color:'var(--red)', marginTop:8 }}>{error}</div>}
       {sharing && (
         <div style={{ position:'relative', borderRadius:8, overflow:'hidden', background:'#000', marginTop:4 }}>
-          <video ref={videoRef} muted style={{ width:'100%', display:'block', maxHeight:200, objectFit:'contain' }}/>
+          <video ref={videoRef} autoPlay playsInline muted style={{ width:'100%', display:'block', maxHeight:200, objectFit:'contain' }}/>
           <div style={{ position:'absolute', top:8, left:8, background:'rgba(248,113,113,0.9)', color:'#fff', fontSize:11, fontWeight:600, padding:'3px 8px', borderRadius:6, display:'flex', alignItems:'center', gap:4 }}>
             <span style={{ width:6, height:6, borderRadius:3, background:'#fff', display:'inline-block', animation:'vox-pulse 1.5s infinite' }}/>
             LIVE
@@ -925,103 +943,579 @@ function ScreenShare({ channelId, channelName, socket }) {
 // ScreenShareViewer — student side (exported, used in ChatView)
 // Uses the real channel._id from ChatView props — this was correct.
 // ────────────────────────────────────────────────────────────────────
-export function ScreenShareViewer({ channelId, socket }) {
-  const [active,      setActive]      = useState(false);
-  const [teacherName, setTeacherName] = useState('');
-  const [watching,    setWatching]    = useState(false);
-  const [error,       setError]       = useState('');
-  const videoRef = useRef(null);
-  const pcRef    = useRef(null);
+// export function ScreenShareViewer({ channelId, socket }) {
+//   const [active,      setActive]      = useState(false);
+//   const [teacherName, setTeacherName] = useState('');
+//   const [watching,    setWatching]    = useState(false);
+//   const [error,       setError]       = useState('');
+//   const videoRef = useRef(null);
+//   const pcRef    = useRef(null);
 
-  const ICE = { iceServers:[{ urls:'stun:stun.l.google.com:19302' },{ urls:'stun:stun1.l.google.com:19302' }] };
+//   const ICE = { iceServers:[{ urls:'stun:stun.l.google.com:19302' },{ urls:'stun:stun1.l.google.com:19302' }] };
+
+//   useEffect(() => {
+//     if (!socket) return;
+
+//     const onActive = ({ channelId: cid, teacherName: tn }) => {
+//       if (String(cid) !== String(channelId)) return;
+//       setActive(true); setTeacherName(tn);
+//     };
+
+//     const onEnded = ({ channelId: cid }) => {
+//       if (String(cid) !== String(channelId)) return;
+//       setActive(false); setWatching(false); setTeacherName('');
+//       if (videoRef.current) videoRef.current.srcObject = null;
+//       pcRef.current?.close(); pcRef.current = null;
+//     };
+
+//     const onOffer = async ({ sdp, teacherSocketId }) => {
+//       // Create peer connection to receive the stream
+//       const pc = new RTCPeerConnection(ICE);
+//       pcRef.current = pc;
+
+//       pc.ontrack = ({ streams }) => {
+//         if (videoRef.current && streams[0]) {
+//           videoRef.current.srcObject = streams[0];
+//           videoRef.current.play().catch(() => {});
+//         }
+//       };
+//       pc.onicecandidate = ({ candidate }) => {
+//         if (candidate) socket.emit('screenshare_ice', { targetSocketId: teacherSocketId, candidate });
+//       };
+//       pc.onconnectionstatechange = () => {
+//         if (pc.connectionState === 'failed') setError('Connection failed. Try refreshing.');
+//       };
+
+//       try {
+//         await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+//         const answer = await pc.createAnswer();
+//         await pc.setLocalDescription(answer);
+//         socket.emit('screenshare_answer', { channelId, teacherSocketId, sdp: pc.localDescription });
+//         setWatching(true);
+//       } catch (err) {
+//         setError('Failed to connect: ' + err.message);
+//       }
+//     };
+
+//     const onIce = async ({ senderSocketId, candidate }) => {
+//       if (pcRef.current) try { await pcRef.current.addIceCandidate(new RTCIceCandidate(candidate)); } catch {}
+//     };
+
+//     socket.on('screenshare_active', onActive);
+//     socket.on('screenshare_ended', onEnded);
+//     socket.on('screenshare_offer', onOffer);
+//     socket.on('screenshare_ice', onIce);
+
+//     return () => {
+//       socket.off('screenshare_active', onActive);
+//       socket.off('screenshare_ended', onEnded);
+//       socket.off('screenshare_offer', onOffer);
+//       socket.off('screenshare_ice', onIce);
+//     };
+//   }, [socket, channelId]);
+
+//   const joinShare = () => socket.emit('screenshare_join', { channelId });
+
+//   if (!active) return null;
+
+//   return (
+//     <div style={{ background:'var(--amber-bg)', border:'1px solid rgba(245,158,11,0.25)', borderRadius:12, padding:14, marginBottom:10 }}>
+//       <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+//         <span style={{ fontSize:18 }}>🖥</span>
+//         <div style={{ flex:1 }}>
+//           <div style={{ fontSize:13, fontWeight:500 }}>{teacherName} is sharing their screen</div>
+//           <div style={{ fontSize:11, color:'var(--text3)' }}>{watching ? 'Connected — viewing live' : 'Click Watch to join'}</div>
+//         </div>
+//         {!watching && (
+//           <button onClick={joinShare} style={{ padding:'7px 14px', borderRadius:8, background:'var(--amber)', color:'#000', border:'none', fontSize:12, fontWeight:600, cursor:'pointer' }}>Watch</button>
+//         )}
+//       </div>
+//       {watching && (
+//         <div style={{ marginTop:10, borderRadius:8, overflow:'hidden', background:'#000' }}>
+//           <video ref={videoRef}  style={{ width:'100%', display:'block', maxHeight:400, objectFit:'contain' }} controls={false}/>
+//         </div>
+//       )}
+//       {error && <div style={{ fontSize:12, color:'var(--red)', marginTop:6 }}>{error}</div>}
+//     </div>
+//   );
+// }
+
+
+export function ScreenShareViewer({ channelId, socket }) {
+
+  const [active, setActive] = useState(false);
+  const [teacherName, setTeacherName] = useState('');
+  const [watching, setWatching] = useState(false);
+  const [error, setError] = useState('');
+
+  const videoRef = useRef(null);
+  const pcRef = useRef(null);
+
+  // STORE REMOTE STREAM HERE
+  const remoteStreamRef = useRef(null);
+
+  // STORE ICE CANDIDATES BEFORE REMOTE DESCRIPTION
+  const pendingCandidates = useRef([]);
+
+  const ICE = {
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' }
+    ]
+  };
+
+  // ATTACH STREAM AFTER VIDEO RENDERS
+  useEffect(() => {
+
+    if (
+      watching &&
+      videoRef.current &&
+      remoteStreamRef.current
+    ) {
+
+      console.log("ATTACHING STREAM");
+
+      videoRef.current.srcObject =
+        remoteStreamRef.current;
+
+      videoRef.current.play()
+        .then(() => {
+          console.log("VIDEO PLAYING");
+        })
+        .catch(err => {
+          console.log("PLAY ERROR:", err);
+        });
+    }
+
+  }, [watching]);
 
   useEffect(() => {
+
     if (!socket) return;
 
-    const onActive = ({ channelId: cid, teacherName: tn }) => {
-      if (String(cid) !== String(channelId)) return;
-      setActive(true); setTeacherName(tn);
+    // CLEANUP FUNCTION
+    const cleanup = () => {
+
+      if (pcRef.current) {
+
+        pcRef.current.ontrack = null;
+        pcRef.current.onicecandidate = null;
+
+        pcRef.current.close();
+
+        pcRef.current = null;
+      }
+
+      if (videoRef.current?.srcObject) {
+
+        const tracks =
+          videoRef.current.srcObject.getTracks();
+
+        tracks.forEach(track => track.stop());
+
+        videoRef.current.srcObject = null;
+      }
+
+      remoteStreamRef.current = null;
+
+      pendingCandidates.current = [];
     };
 
-    const onEnded = ({ channelId: cid }) => {
-      if (String(cid) !== String(channelId)) return;
-      setActive(false); setWatching(false); setTeacherName('');
-      if (videoRef.current) videoRef.current.srcObject = null;
-      pcRef.current?.close(); pcRef.current = null;
+    // TEACHER STARTED SHARING
+    const onActive = ({
+      channelId: cid,
+      teacherName: tn
+    }) => {
+
+      if (String(cid) !== String(channelId))
+        return;
+
+      setActive(true);
+
+      setTeacherName(tn);
     };
 
-    const onOffer = async ({ sdp, teacherSocketId }) => {
-      // Create peer connection to receive the stream
-      const pc = new RTCPeerConnection(ICE);
-      pcRef.current = pc;
+    // TEACHER STOPPED SHARING
+    const onEnded = ({
+      channelId: cid
+    }) => {
 
-      pc.ontrack = ({ streams }) => {
-        if (videoRef.current && streams[0]) {
-          videoRef.current.srcObject = streams[0];
-          videoRef.current.play().catch(() => {});
-        }
-      };
-      pc.onicecandidate = ({ candidate }) => {
-        if (candidate) socket.emit('screenshare_ice', { targetSocketId: teacherSocketId, candidate });
-      };
-      pc.onconnectionstatechange = () => {
-        if (pc.connectionState === 'failed') setError('Connection failed. Try refreshing.');
-      };
+      if (String(cid) !== String(channelId))
+        return;
+
+      cleanup();
+
+      setActive(false);
+      setWatching(false);
+      setTeacherName('');
+    };
+
+    // RECEIVE OFFER FROM TEACHER
+    const onOffer = async ({
+      sdp,
+      teacherSocketId
+    }) => {
 
       try {
-        await pc.setRemoteDescription(new RTCSessionDescription(sdp));
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        socket.emit('screenshare_answer', { channelId, teacherSocketId, sdp: pc.localDescription });
-        setWatching(true);
+
+        cleanup();
+
+        const pc = new RTCPeerConnection(ICE);
+
+        pcRef.current = pc;
+
+        // RECEIVE TRACK
+        pc.ontrack = ({ streams, track }) => {
+
+          console.log(
+            "TRACK RECEIVED:",
+            track
+          );
+
+          console.log(
+            "STREAMS:",
+            streams
+          );
+
+          if (!streams[0]) return;
+
+          // STORE STREAM
+          remoteStreamRef.current =
+            streams[0];
+
+          console.log("STREAM STORED");
+
+          // RENDER VIDEO
+          setWatching(true);
+        };
+
+        // SEND ICE TO TEACHER
+        pc.onicecandidate = ({
+          candidate
+        }) => {
+
+          if (candidate) {
+
+            socket.emit(
+              'screenshare_ice',
+              {
+                targetSocketId:
+                  teacherSocketId,
+                candidate
+              }
+            );
+          }
+        };
+
+        // CONNECTION STATUS
+        pc.onconnectionstatechange =
+          () => {
+
+            console.log(
+              "VIEWER CONNECTION:",
+              pc.connectionState
+            );
+
+            switch (
+              pc.connectionState
+            ) {
+
+              case 'connected':
+                setError('');
+                break;
+
+              case 'failed':
+                setError(
+                  'Connection failed.'
+                );
+                break;
+
+              case 'disconnected':
+                setError(
+                  'Disconnected.'
+                );
+                break;
+
+              case 'closed':
+                setWatching(false);
+                break;
+
+              default:
+                break;
+            }
+          };
+
+        // SET REMOTE OFFER
+        await pc.setRemoteDescription(
+          new RTCSessionDescription(
+            sdp
+          )
+        );
+
+        // ADD PENDING ICE
+        for (
+          const candidate of
+          pendingCandidates.current
+        ) {
+
+          await pc.addIceCandidate(
+            new RTCIceCandidate(
+              candidate
+            )
+          );
+        }
+
+        pendingCandidates.current = [];
+
+        // CREATE ANSWER
+        const answer =
+          await pc.createAnswer();
+
+        await pc.setLocalDescription(
+          answer
+        );
+
+        // SEND ANSWER
+        socket.emit(
+          'screenshare_answer',
+          {
+            channelId,
+            teacherSocketId,
+            sdp: pc.localDescription
+          }
+        );
+
       } catch (err) {
-        setError('Failed to connect: ' + err.message);
+
+        console.log(err);
+
+        setError(
+          'Failed to connect: ' +
+          err.message
+        );
       }
     };
 
-    const onIce = async ({ senderSocketId, candidate }) => {
-      if (pcRef.current) try { await pcRef.current.addIceCandidate(new RTCIceCandidate(candidate)); } catch {}
+    // RECEIVE ICE
+    const onIce = async ({
+      candidate
+    }) => {
+
+      try {
+
+        const pc = pcRef.current;
+
+        // PEER NOT READY YET
+        if (!pc) {
+
+          pendingCandidates.current.push(
+            candidate
+          );
+
+          return;
+        }
+
+        // REMOTE DESCRIPTION READY
+        if (pc.remoteDescription) {
+
+          await pc.addIceCandidate(
+            new RTCIceCandidate(
+              candidate
+            )
+          );
+
+        } else {
+
+          pendingCandidates.current.push(
+            candidate
+          );
+        }
+
+      } catch (err) {
+
+        console.log(
+          "ICE ERROR:",
+          err
+        );
+      }
     };
 
-    socket.on('screenshare_active', onActive);
-    socket.on('screenshare_ended', onEnded);
-    socket.on('screenshare_offer', onOffer);
-    socket.on('screenshare_ice', onIce);
+    socket.on(
+      'screenshare_active',
+      onActive
+    );
+
+    socket.on(
+      'screenshare_ended',
+      onEnded
+    );
+
+    socket.on(
+      'screenshare_offer',
+      onOffer
+    );
+
+    socket.on(
+      'screenshare_ice',
+      onIce
+    );
 
     return () => {
-      socket.off('screenshare_active', onActive);
-      socket.off('screenshare_ended', onEnded);
-      socket.off('screenshare_offer', onOffer);
-      socket.off('screenshare_ice', onIce);
+
+      cleanup();
+
+      socket.off(
+        'screenshare_active',
+        onActive
+      );
+
+      socket.off(
+        'screenshare_ended',
+        onEnded
+      );
+
+      socket.off(
+        'screenshare_offer',
+        onOffer
+      );
+
+      socket.off(
+        'screenshare_ice',
+        onIce
+      );
     };
+
   }, [socket, channelId]);
 
-  const joinShare = () => socket.emit('screenshare_join', { channelId });
+  // JOIN SCREEN SHARE
+  const joinShare = () => {
 
+    setError('');
+
+    socket.emit(
+      'screenshare_join',
+      {
+        channelId
+      }
+    );
+  };
+
+  // NO ACTIVE SHARE
   if (!active) return null;
 
   return (
-    <div style={{ background:'var(--amber-bg)', border:'1px solid rgba(245,158,11,0.25)', borderRadius:12, padding:14, marginBottom:10 }}>
-      <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-        <span style={{ fontSize:18 }}>🖥</span>
-        <div style={{ flex:1 }}>
-          <div style={{ fontSize:13, fontWeight:500 }}>{teacherName} is sharing their screen</div>
-          <div style={{ fontSize:11, color:'var(--text3)' }}>{watching ? 'Connected — viewing live' : 'Click Watch to join'}</div>
+    <div
+      style={{
+        background:
+          'var(--amber-bg)',
+        border:
+          '1px solid rgba(245,158,11,0.25)',
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 10
+      }}
+    >
+
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10
+        }}
+      >
+
+        <span
+          style={{
+            fontSize: 18
+          }}
+        >
+          🖥
+        </span>
+
+        <div style={{ flex: 1 }}>
+
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 500
+            }}
+          >
+            {teacherName}
+            {' '}
+            is sharing their screen
+          </div>
+
+          <div
+            style={{
+              fontSize: 11,
+              color: 'var(--text3)'
+            }}
+          >
+            {watching
+              ? 'Connected — viewing live'
+              : 'Click Watch to join'}
+          </div>
         </div>
+
         {!watching && (
-          <button onClick={joinShare} style={{ padding:'7px 14px', borderRadius:8, background:'var(--amber)', color:'#000', border:'none', fontSize:12, fontWeight:600, cursor:'pointer' }}>Watch</button>
+          <button
+            onClick={joinShare}
+            style={{
+              padding: '7px 14px',
+              borderRadius: 8,
+              background:
+                'var(--amber)',
+              color: '#000',
+              border: 'none',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            Watch
+          </button>
         )}
       </div>
+
       {watching && (
-        <div style={{ marginTop:10, borderRadius:8, overflow:'hidden', background:'#000' }}>
-          <video ref={videoRef}  style={{ width:'100%', display:'block', maxHeight:400, objectFit:'contain' }} controls={false}/>
+        <div
+          style={{
+            marginTop: 10,
+            borderRadius: 8,
+            overflow: 'hidden',
+            background: '#000'
+          }}
+        >
+
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            style={{
+              width: '100%',
+              display: 'block',
+              maxHeight: 400,
+              objectFit: 'contain'
+            }}
+          />
         </div>
       )}
-      {error && <div style={{ fontSize:12, color:'var(--red)', marginTop:6 }}>{error}</div>}
+
+      {error && (
+        <div
+          style={{
+            fontSize: 12,
+            color: 'var(--red)',
+            marginTop: 6
+          }}
+        >
+          {error}
+        </div>
+      )}
     </div>
   );
 }
-
 // ────────────────────────────────────────────────────────────────────
 // Poll analytics card
 // ────────────────────────────────────────────────────────────────────

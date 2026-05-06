@@ -420,7 +420,7 @@ function LoginForm() {
       <div className="login-hint">
         Demo &nbsp;·&nbsp;
         <span style={{cursor:'pointer',color:'var(--accent)'}} onClick={()=>fill('2410991517','2410991517')}>Student</span>&nbsp;·&nbsp;
-        <span style={{cursor:'pointer',color:'var(--purple)'}} onClick={()=>fill('TCH001','teacher@123')}>Teacher</span>&nbsp;·&nbsp;
+        <span style={{cursor:'pointer',color:'var(--purple)'}} onClick={()=>fill('TCH26002','teacher@123')}>Teacher</span>&nbsp;·&nbsp;
         <span style={{cursor:'pointer',color:'var(--amber)'}} onClick={()=>fill('ADMIN001','admin@voxcampus')}>Admin</span>
       </div>
     </form>
