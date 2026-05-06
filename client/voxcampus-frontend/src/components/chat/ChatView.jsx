@@ -360,9 +360,7 @@ function FileAttachment({ msg }) {
 
     return url.replace(
       "/upload/",
-      `/upload/fl_attachment:${encodeURIComponent(
-        filename || "file"
-      )}/`
+      `/upload/fl_attachment:${encodeURIComponent(filename)}/`
     );
   };
 
