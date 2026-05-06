@@ -190,7 +190,7 @@ function LoginForm() {
     <form onSubmit={submit}>
       {err && <div className="login-error">{err}</div>}
       <div style={grp}><label style={lbl}>Roll Number / Teacher ID</label>
-        <input style={{...inp,fontFamily:'var(--mono)'}} placeholder="e.g. 2410991517 or TCH25001" value={rollNo} onChange={e=>setRollNo(e.target.value)} autoFocus required/>
+        <input style={{...inp,fontFamily:'var(--mono)'}} placeholder="e.g. 2410990000 or TCH25001" value={rollNo} onChange={e=>setRollNo(e.target.value)} autoFocus required/>
       </div>
       <div style={grp}><label style={lbl}>Password</label>
         <input style={inp} type="password" placeholder="Your password" value={pwd} onChange={e=>setPwd(e.target.value)} required/>
