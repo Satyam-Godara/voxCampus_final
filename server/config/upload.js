@@ -60,19 +60,20 @@
 
 // module.exports = { postImageUpload, teacherFileUpload, getFileType };
 
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
 
-const {
-  CloudinaryStorage
-} = require('multer-storage-cloudinary');
+// ── Configure Cloudinary ──────────────────────────────────────────────────
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key:    process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-const cloudinary = require('./cloudinary');
-
-const allowed = [
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
+// ── Allowed MIME types for teacher file shares ────────────────────────────
+const ALLOWED_TEACHER_FORMATS = [
+  'image/jpeg', 'image/png', 'image/gif', 'image/webp',
   'application/pdf',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -81,99 +82,61 @@ const allowed = [
   'text/plain',
 ];
 
-const fileFilter = (req, file, cb) => {
-
-  if (allowed.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error('File type not allowed'));
-  }
-};
-
-const imageStorage = new CloudinaryStorage({
+// ── Cloudinary storage for post images (students) ─────────────────────────
+// Stored at: voxcampus/posts/<public_id>
+const postImageStorage = new CloudinaryStorage({
   cloudinary,
-
-  params: async (req, file) => ({
-    folder: 'voxcampus/images',
-
-    resource_type: 'image',
-
-    public_id:
-      `${Date.now()}-${Math.round(Math.random() * 1e9)}`
-  })
+  params: (req, file) => ({
+    folder:         'voxcampus/posts',
+    resource_type:  'image',
+    allowed_formats:['jpg','jpeg','png','gif','webp'],
+    transformation: [{ width:1200, crop:'limit', quality:'auto', fetch_format:'auto' }],
+    public_id:      `post_${Date.now()}_${Math.round(Math.random()*1e6)}`,
+  }),
 });
 
-const fileStorage = new CloudinaryStorage({
+// ── Cloudinary storage for teacher files ──────────────────────────────────
+// Images → voxcampus/files/images, everything else → voxcampus/files/docs
+const teacherFileStorage = new CloudinaryStorage({
   cloudinary,
-
-  params: async (req, file) => ({
-
-    folder: 'voxcampus/files',
-
-    resource_type: 'raw',
-
-    public_id:
-      `${Date.now()}-${Math.round(Math.random() * 1e9)}`
-  })
-});
-
-const postImageUpload = multer({
-  storage: imageStorage,
-
-  fileFilter: (req, file, cb) => {
-
-    if (
-      file.mimetype.startsWith('image/')
-    ) {
-      cb(null, true);
-    } else {
-      cb(
-        new Error(
-          'Only images allowed'
-        )
-      );
-    }
+  params: (req, file) => {
+    const isImage = file.mimetype.startsWith('image/');
+    return {
+      folder:        isImage ? 'voxcampus/files/images' : 'voxcampus/files/docs',
+      resource_type: isImage ? 'image' : 'raw',
+      public_id:     `file_${Date.now()}_${Math.round(Math.random()*1e6)}`,
+      // For images apply auto-optimisation; for raw files keep as-is
+      ...(isImage ? { transformation:[{ quality:'auto', fetch_format:'auto' }] } : {}),
+    };
   },
+});
 
-  limits: {
-    fileSize: 5 * 1024 * 1024
-  }
+// ── Multer instances ──────────────────────────────────────────────────────
+const postImageUpload = multer({
+  storage: postImageStorage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Only images are allowed for posts'), false);
+  },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
 });
 
 const teacherFileUpload = multer({
-  storage: fileStorage,
-
-  fileFilter,
-
-  limits: {
-    fileSize: 20 * 1024 * 1024
-  }
+  storage: teacherFileStorage,
+  fileFilter: (req, file, cb) => {
+    if (ALLOWED_TEACHER_FORMATS.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('File type not allowed'), false);
+  },
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20 MB
 });
 
+// ── Helper: classify file type for frontend rendering ─────────────────────
 const getFileType = (mimetype) => {
-
-  if (
-    mimetype.startsWith('image/')
-  ) return 'image';
-
-  if (
-    mimetype === 'application/pdf'
-  ) return 'pdf';
-
-  if (
-    mimetype.includes('word')
-  ) return 'doc';
-
-  if (
-    mimetype.includes('powerpoint') ||
-    mimetype.includes('presentation')
-  ) return 'ppt';
-
+  if (mimetype.startsWith('image/'))  return 'image';
+  if (mimetype === 'application/pdf') return 'pdf';
+  if (mimetype.includes('word'))      return 'doc';
+  if (mimetype.includes('powerpoint') || mimetype.includes('presentation')) return 'ppt';
   return 'other';
 };
 
-module.exports = {
-  postImageUpload,
-  teacherFileUpload,
-  getFileType
-};
+module.exports = { cloudinary, postImageUpload, teacherFileUpload, getFileType };
