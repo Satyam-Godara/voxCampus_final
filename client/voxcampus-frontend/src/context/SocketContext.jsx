@@ -39,7 +39,7 @@ export const SocketProvider = ({ children, token }) => {
   useEffect(() => {
     if (!token) return;
 
-    const socket = io('/', { auth: { token }, transports: ['websocket'] });
+    const socket = io('https://voxcampus-final.onrender.com', { auth: { token }, transports: ['websocket'] });
     socketRef.current = socket;
 
     socket.on('connect',    () => setConnected(true));
