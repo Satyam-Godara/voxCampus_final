@@ -330,23 +330,124 @@ function groupByDate(msgs) {
 const FILE_ICON = { pdf: '📄', doc: '📝', ppt: '📊', image: '🖼', other: '📎' };
 
 // ── File attachment renderer ───────────────────────────────────────────────
+// function FileAttachment({ msg }) {
+//   if (!msg.fileUrl) return null;
+//   if (msg.fileType === 'image') return (
+//     <a href={msg.fileUrl} target="_blank" rel="noreferrer">
+//       <img src={msg.fileUrl} loading='lazy' alt={msg.fileName || 'image'}
+//         style={{ maxWidth: 280, maxHeight: 200, borderRadius: 8, marginTop: 6, display: 'block', objectFit: 'cover', cursor: 'pointer' }} />
+//     </a>
+//   );
+//   return (
+//     <a href={msg.fileUrl} target="_blank" rel="noreferrer" download={msg.fileName}
+//       style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 6, background: 'var(--bg3)', border: '1px solid var(--border2)', borderRadius: 8, padding: '8px 12px', color: 'var(--text2)', fontSize: 12, textDecoration: 'none', transition: 'all 150ms' }}
+//       onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg4)')}
+//       onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg3)')}
+//     >
+//       <span>{FILE_ICON[msg.fileType] || '📎'}</span>
+//       <span style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{msg.fileName || 'Download file'}</span>
+//       <span style={{ color: 'var(--accent)', fontSize: 11 }}>↓</span>
+//     </a>
+//   );
+// }
 function FileAttachment({ msg }) {
   if (!msg.fileUrl) return null;
-  if (msg.fileType === 'image') return (
-    <a href={msg.fileUrl} target="_blank" rel="noreferrer">
-      <img src={msg.fileUrl} loading='lazy' alt={msg.fileName || 'image'}
-        style={{ maxWidth: 280, maxHeight: 200, borderRadius: 8, marginTop: 6, display: 'block', objectFit: 'cover', cursor: 'pointer' }} />
-    </a>
+
+  // Generate Cloudinary forced-download URL
+  const getDownloadUrl = (url, filename) => {
+    if (!url.includes("cloudinary")) return url;
+
+    return url.replace(
+      "/upload/",
+      `/upload/fl_attachment:${encodeURIComponent(
+        filename || "file"
+      )}/`
+    );
+  };
+
+  const downloadUrl = getDownloadUrl(
+    msg.fileUrl,
+    msg.fileName
   );
+
+  // Image preview
+  if (msg.fileType === "image") {
+    return (
+      <a
+        href={msg.fileUrl}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <img
+          src={msg.fileUrl}
+          loading="lazy"
+          alt={msg.fileName || "image"}
+          style={{
+            maxWidth: 280,
+            maxHeight: 200,
+            borderRadius: 8,
+            marginTop: 6,
+            display: "block",
+            objectFit: "cover",
+            cursor: "pointer",
+          }}
+        />
+      </a>
+    );
+  }
+
+  // Downloadable files
   return (
-    <a href={msg.fileUrl} target="_blank" rel="noreferrer" download={msg.fileName}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 6, background: 'var(--bg3)', border: '1px solid var(--border2)', borderRadius: 8, padding: '8px 12px', color: 'var(--text2)', fontSize: 12, textDecoration: 'none', transition: 'all 150ms' }}
-      onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg4)')}
-      onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg3)')}
+    <a
+      href={downloadUrl}
+      target="_blank"
+      rel="noreferrer"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 8,
+        marginTop: 6,
+        background: "var(--bg3)",
+        border: "1px solid var(--border2)",
+        borderRadius: 8,
+        padding: "8px 12px",
+        color: "var(--text2)",
+        fontSize: 12,
+        textDecoration: "none",
+        transition: "all 150ms",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background =
+          "var(--bg4)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background =
+          "var(--bg3)";
+      }}
     >
-      <span>{FILE_ICON[msg.fileType] || '📎'}</span>
-      <span style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{msg.fileName || 'Download file'}</span>
-      <span style={{ color: 'var(--accent)', fontSize: 11 }}>↓</span>
+      <span>
+        {FILE_ICON[msg.fileType] || "📎"}
+      </span>
+
+      <span
+        style={{
+          maxWidth: 180,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {msg.fileName || "Download file"}
+      </span>
+
+      <span
+        style={{
+          color: "var(--accent)",
+          fontSize: 11,
+        }}
+      >
+        ↓
+      </span>
     </a>
   );
 }
