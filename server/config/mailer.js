@@ -13,12 +13,12 @@ const nodemailer = require('nodemailer');
 // });
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
+  host: 'smtp-relay.brevo.com',
   port: 587,
   secure: false, // IMPORTANT
   auth: {
-    user: "voxcampus15@gmail.com",
-    pass: "hyko kxaw wvti ltan",
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
   }
 });
 
