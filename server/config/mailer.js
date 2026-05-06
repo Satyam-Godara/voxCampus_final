@@ -17,12 +17,13 @@ const transporter = nodemailer.createTransport({
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS,
   },
-  connectionTimeout: 30000,
-  greetingTimeout: 30000,
-  socketTimeout: 30000,
+  connectionTimeout: 60000,
+  greetingTimeout: 60000,
+  socketTimeout: 60000,
+  console.log("transporter created");
 });
-
 const sendOTP = async (to, otp, name) => {
+  console.log(`SendOTP function is called for name : ${name} otp ${otp} to ${to}`);
   await transporter.sendMail({
     from: process.env.MAIL_FROM || 'VoxCampus <noreply@voxcampus.edu>',
     to,
