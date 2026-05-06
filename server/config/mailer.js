@@ -39,7 +39,7 @@ const axios = require('axios');
 // const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendOTP = async (to, otp, name) => {
-  console.log(`SendOTP function is called for name : ${name} otp ${otp} to ${to}`);
+  // console.log(`SendOTP function is called for name : ${name} otp ${otp} to ${to}`);
 //   transporter.verify((err, success) => {
 //   if (err) {
 //     console.log("VERIFY ERROR:", err);
@@ -115,12 +115,23 @@ const sendOTP = async (to, otp, name) => {
 };
 
 const sendAcceptanceMail = async (to, rollNo, name) => {
-  await transporter.sendMail({
-    from: process.env.MAIL_FROM || 'VoxCampus <noreply@voxcampus.edu>',
-    to,
-    subject: 'VoxCampus — Account Approved',
-    html: `
-      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#0f1117;color:#e8eaf0;border-radius:12px">
+  try {
+    const response = await axios.post(
+      'https://api.brevo.com/v3/smtp/email',
+      {
+        sender: {
+          name: 'VoxCampus',
+          email: 'voxcampus15@gmail.com',
+        },
+        to: [
+          {
+            email: to,
+            name,
+          },
+        ],
+        subject: 'VoxCampus OTP Verification',
+        htmlContent: `
+         <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#0f1117;color:#e8eaf0;border-radius:12px">
         <h2 style="color:#6c8fff;margin:0 0 8px">VoxCampus</h2>
         <p style="color:#8b92a8;margin:0 0 24px">Chitkara University · Campus Platform</p>
         <p>Hi <strong>${name}</strong>,</p>
@@ -129,8 +140,44 @@ const sendAcceptanceMail = async (to, rollNo, name) => {
         <div style="font-size:34px;font-weight:600;letter-spacing:10px;background:#1e2535;padding:20px;border-radius:10px;text-align:center;color:#6c8fff;margin:20px 0">${rollNo}</div>
         <p style="color:#8b92a8;font-size:13px">Login to VoxCampus to explore more!!</p>
       </div>
-    `,
-  });
+        `,
+      },
+      {
+        headers: {
+          accept: 'application/json',
+          'api-key': process.env.BREVO_API_KEY,
+          'content-type': 'application/json',
+        },
+      }
+    );
+
+    console.log('BREVO SUCCESS:', response.data);
+
+  } catch (err) {
+    console.log(
+      'BREVO ERROR:',
+      err.response?.data || err.message
+    );
+
+    throw err;
+  }
+
+  // await transporter.sendMail({
+  //   from: process.env.MAIL_FROM || 'VoxCampus <noreply@voxcampus.edu>',
+  //   to,
+  //   subject: 'VoxCampus — Account Approved',
+  //   html: `
+  //     <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#0f1117;color:#e8eaf0;border-radius:12px">
+  //       <h2 style="color:#6c8fff;margin:0 0 8px">VoxCampus</h2>
+  //       <p style="color:#8b92a8;margin:0 0 24px">Chitkara University · Campus Platform</p>
+  //       <p>Hi <strong>${name}</strong>,</p>
+  //       <div style={{fontSize:30,marginBottom:12}}>Welcome to VoxCampus ! 🎉</div>
+  //       <p>Your account has been approved by ADMIN and your rollNo/id is :</p>
+  //       <div style="font-size:34px;font-weight:600;letter-spacing:10px;background:#1e2535;padding:20px;border-radius:10px;text-align:center;color:#6c8fff;margin:20px 0">${rollNo}</div>
+  //       <p style="color:#8b92a8;font-size:13px">Login to VoxCampus to explore more!!</p>
+  //     </div>
+  //   `,
+  // });
 };
 
 module.exports = { sendOTP, sendAcceptanceMail };
