@@ -12,15 +12,29 @@ const nodemailer = require('nodemailer');
 //   },
 // });
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 587,
   auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
+    user: "voxcampus15@gmail.com",
+    pass: "hyko kxaw wvti ltan",
   },
   connectionTimeout: 60000,
   greetingTimeout: 60000,
   socketTimeout: 60000,
 });
+
+// const transporter = nodemailer.createTransport({
+//   host: "smtp-relay.brevo.com",
+//   port: 587,
+//   secure: false,
+//   auth: {
+//     user: process.env.MAIL_USER,
+//     pass: process.env.MAIL_PASS,
+//   },
+//   connectionTimeout: 10000,
+//   greetingTimeout: 10000,
+//   socketTimeout: 10000,
+// });
 
 transporter.verify((err, success) => {
   if (err) {
