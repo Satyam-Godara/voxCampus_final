@@ -351,7 +351,7 @@ const FILE_ICON = { pdf: '📄', doc: '📝', ppt: '📊', image: '🖼', other:
 //   );
 // }
 function FileAttachment({ msg }) {
-  console.log(msg);
+  // console.log(msg);
   if (!msg.fileUrl) return null;
 
   // Generate Cloudinary forced-download URL
@@ -395,7 +395,7 @@ function FileAttachment({ msg }) {
   // Downloadable files
   return (
     <a
-      href={downloadUrl}
+      href={msg.fileUrl}
       target="_blank"
       rel="noreferrer"
       style={{
