@@ -21,9 +21,16 @@ function StudentRegister({ classes, onBack }) {
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
 
   const sendOtp = async e => {
-    console.log("SendOtp called from frontend");
+    // console.log("SendOtp called from frontend");
     e.preventDefault(); setErr(''); setLoading(true);
-    try { await api.post('/auth/register/send-otp', form); setStep(2); console.log("frontend sendOtp post done");}
+
+    //eamil validation
+    if (!form.email.endsWith('@chitkara.edu.in')) {
+    setErr('Enter university email only');
+    setLoading(false);
+    return;
+  }
+    try { await api.post('/auth/register/send-otp', form); setStep(2);}
     catch (e) { setErr(e.response?.data?.error || 'Failed to send OTP'); }
     finally { setLoading(false); }
   };
