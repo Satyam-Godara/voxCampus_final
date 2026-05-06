@@ -11,16 +11,21 @@ const nodemailer = require('nodemailer');
 //     // pass: process.env.MAIL_PASS,
 //   },
 // });
+
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
+  secure: false, // IMPORTANT
   auth: {
     user: "voxcampus15@gmail.com",
     pass: "hyko kxaw wvti ltan",
   },
-  connectionTimeout: 60000,
-  greetingTimeout: 60000,
-  socketTimeout: 60000,
+  tls: {
+    rejectUnauthorized: false,
+  },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
 });
 
 // const transporter = nodemailer.createTransport({
