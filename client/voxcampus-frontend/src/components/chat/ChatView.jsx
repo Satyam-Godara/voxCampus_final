@@ -334,7 +334,7 @@ function FileAttachment({ msg }) {
   if (!msg.fileUrl) return null;
   if (msg.fileType === 'image') return (
     <a href={msg.fileUrl} target="_blank" rel="noreferrer">
-      <img src={msg.fileUrl} alt={msg.fileName || 'image'}
+      <img src={msg.fileUrl} loading='lazy' alt={msg.fileName || 'image'}
         style={{ maxWidth: 280, maxHeight: 200, borderRadius: 8, marginTop: 6, display: 'block', objectFit: 'cover', cursor: 'pointer' }} />
     </a>
   );
@@ -614,7 +614,7 @@ export default function ChatView({ channel, socket, isDM = false }) {
             {uploadPreview && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--bg3)', border: '1px solid var(--border2)', borderRadius: 8, padding: '8px 12px', marginBottom: 8 }}>
                 {uploadPreview.fileType === 'image'
-                  ? <img src={uploadPreview.url} alt="" style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6 }} />
+                  ? <img src={uploadPreview.url} loading='lazy' alt="" style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6 }} />
                   : <span style={{ fontSize: 20 }}>{FILE_ICON[uploadPreview.fileType] || '📎'}</span>
                 }
                 <span style={{ fontSize: 12, color: 'var(--text2)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{uploadPreview.name}</span>
