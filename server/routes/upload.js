@@ -32,101 +32,47 @@
 
 // module.exports = router;
 
-
-const express = require('express');
-
-const router = express.Router();
-
-const {
-  postImageUpload,
-  teacherFileUpload,
-  getFileType
-} = require('../config/upload');
-
+const express  = require('express');
+const router   = express.Router();
+const { postImageUpload, teacherFileUpload, getFileType } = require('../config/upload');
 const { auth } = require('../middleware/auth');
 
-router.post(
-  '/post-image',
-  auth,
-  (req, res) => {
+// POST /api/upload/post-image
+// Students attach one image to a General/Feedback/Complaints post.
+// Returns the Cloudinary secure_url as `url`.
+router.post('/post-image', auth, (req, res) => {
+  postImageUpload.single('image')(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
-    postImageUpload.single('image')(
-      req,
-      res,
-      (err) => {
+    res.json({
+      url:      req.file.path,           // Cloudinary secure HTTPS URL
+      filename: req.file.originalname,
+      fileType: 'image',
+    });
+  });
+});
 
-        if (err) {
-
-          return res.status(400).json({
-            error: err.message
-          });
-        }
-
-        if (!req.file) {
-
-          return res.status(400).json({
-            error: 'No file uploaded'
-          });
-        }
-
-        res.json({
-          url: req.file.path,
-          filename:
-            req.file.originalname,
-          fileType: 'image'
-        });
-      }
-    );
+// POST /api/upload/teacher-file
+// Teachers share files (PDF, Word, PPT, images) in subject channels.
+// Returns the Cloudinary secure_url as `url`.
+router.post('/teacher-file', auth, (req, res) => {
+  if (req.user.role !== 'teacher' && req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Teachers only' });
   }
-);
 
-router.post(
-  '/teacher-file',
-  auth,
-  (req, res) => {
+  teacherFileUpload.single('file')(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
-    if (
-      req.user.role !== 'teacher' &&
-      req.user.role !== 'admin'
-    ) {
+    const fileType = getFileType(req.file.mimetype);
 
-      return res.status(403).json({
-        error: 'Teachers only'
-      });
-    }
-
-    teacherFileUpload.single('file')(
-      req,
-      res,
-      (err) => {
-
-        if (err) {
-
-          return res.status(400).json({
-            error: err.message
-          });
-        }
-
-        if (!req.file) {
-
-          return res.status(400).json({
-            error: 'No file uploaded'
-          });
-        }
-
-        res.json({
-          url: req.file.path,
-          filename:
-            req.file.originalname,
-
-          fileType:
-            getFileType(
-              req.file.mimetype
-            )
-        });
-      }
-    );
-  }
-);
+    res.json({
+      url:      req.file.path,           // Cloudinary secure HTTPS URL
+      filename: req.file.originalname,
+      fileType,
+    });
+  });
+});
 
 module.exports = router;
