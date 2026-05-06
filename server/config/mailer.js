@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-
+const { Resend } = require('resend');
 // const transporter = nodemailer.createTransport({
 //   // host: process.env.MAIL_HOST || 'smtp.gmail.com',
 //   host: 'smtp.gmail.com',
@@ -12,15 +12,15 @@ const nodemailer = require('nodemailer');
 //   },
 // });
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp-relay.brevo.com',
-  port: 587,
-  secure: false, // IMPORTANT
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
-  }
-});
+// const transporter = nodemailer.createTransport({
+//   host: 'smtp-relay.brevo.com',
+//   port: 587,
+//   secure: false, // IMPORTANT
+//   auth: {
+//     user: process.env.MAIL_USER,
+//     pass: process.env.MAIL_PASS,
+//   }
+// });
 
 // const transporter = nodemailer.createTransport({
 //   host: "smtp-relay.brevo.com",
@@ -35,19 +35,20 @@ const transporter = nodemailer.createTransport({
 //   socketTimeout: 10000,
 // });
 
-
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendOTP = async (to, otp, name) => {
   console.log(`SendOTP function is called for name : ${name} otp ${otp} to ${to}`);
-  transporter.verify((err, success) => {
-  if (err) {
-    console.log("VERIFY ERROR:", err);
-  } else {
-    console.log("SMTP READY");
-  }
-});
-  await transporter.sendMail({
-    from: process.env.MAIL_FROM || 'VoxCampus <noreply@voxcampus.edu>',
+//   transporter.verify((err, success) => {
+//   if (err) {
+//     console.log("VERIFY ERROR:", err);
+//   } else {
+//     console.log("SMTP READY");
+//   }
+// });
+  // await transporter.sendMail({
+  await resend.emails.send({
+    from: 'VoxCampus <noreply@voxcampus.edu>',
     to,
     subject: 'VoxCampus — Your OTP for registration',
     html: `
