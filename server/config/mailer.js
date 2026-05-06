@@ -35,16 +35,17 @@ const transporter = nodemailer.createTransport({
 //   socketTimeout: 10000,
 // });
 
-transporter.verify((err, success) => {
+
+
+const sendOTP = async (to, otp, name) => {
+  console.log(`SendOTP function is called for name : ${name} otp ${otp} to ${to}`);
+  transporter.verify((err, success) => {
   if (err) {
     console.log("VERIFY ERROR:", err);
   } else {
     console.log("SMTP READY");
   }
 });
-
-const sendOTP = async (to, otp, name) => {
-  console.log(`SendOTP function is called for name : ${name} otp ${otp} to ${to}`);
   await transporter.sendMail({
     from: process.env.MAIL_FROM || 'VoxCampus <noreply@voxcampus.edu>',
     to,
