@@ -70,6 +70,7 @@ async function buildSubjectTeacherMap(classRefId) {
 router.post('/register/send-otp', async (req, res) => {
   try {
     const { rollNo, name, email, classId } = req.body;
+    console.log(req.body);
     if (!rollNo || !name || !email || !classId)
       return res.status(400).json({ error: 'rollNo, name, email and classId are required' });
 
@@ -85,7 +86,9 @@ router.post('/register/send-otp', async (req, res) => {
     if (!cls) return res.status(404).json({ error: 'Class not found' });
 
     const otp = genOTP();
+    console.log(otp);
     await sendOTP(email, otp, name);
+    console.log("otp sent");
     await User.findOneAndUpdate(
       { rollNo: rollNo.toUpperCase() },
       {
@@ -96,6 +99,7 @@ router.post('/register/send-otp', async (req, res) => {
       },
       { upsert: true, new: true }
     );
+    console.log("user added");
     res.json({ message: 'OTP sent to your email' });
   } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to send OTP' }); }
 });
