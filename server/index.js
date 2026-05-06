@@ -68,10 +68,13 @@ const socketHandler = require('./socket');
 
 const app    = express();
 const server = http.createServer(app);
-
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:5173',
+  'https://vox-campus-final-7ah3.vercel.app'
+];
 const io = new Server(server, {
   cors: {
-    origin:  process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
     credentials: true,
   },
@@ -80,7 +83,7 @@ const io = new Server(server, {
 // Init notification helper with socket instance
 notifyHelper.init(io);
 
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173', credentials: true }));
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 
 // Serve uploaded files statically
