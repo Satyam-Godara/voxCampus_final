@@ -358,10 +358,7 @@ function FileAttachment({ msg }) {
   const getDownloadUrl = (url, filename) => {
     if (!url.includes("cloudinary")) return url;
 
-    return url.replace(
-      "/upload/",
-      `/upload/fl_attachment:${encodeURIComponent(filename)}/`
-    );
+    return url
   };
 
   const downloadUrl = getDownloadUrl(
