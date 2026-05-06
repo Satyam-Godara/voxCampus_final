@@ -100,11 +100,13 @@ const postImageStorage = new CloudinaryStorage({
 const teacherFileStorage = new CloudinaryStorage({
   cloudinary,
   params: (req, file) => {
+    const ext = path.extname(file.originalname);
     const isImage = file.mimetype.startsWith('image/');
     return {
       folder:        isImage ? 'voxcampus/files/images' : 'voxcampus/files/docs',
       resource_type: isImage ? 'image' : 'raw',
-      public_id:     `file_${Date.now()}_${Math.round(Math.random()*1e6)}`,
+      // Math.round(Math.random()*1e6)
+      public_id:     `file_${Date.now()}${ext}`,
       // For images apply auto-optimisation; for raw files keep as-is
       ...(isImage ? { transformation:[{ quality:'auto', fetch_format:'auto' }] } : {}),
     };
