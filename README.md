@@ -1,6 +1,4 @@
-# VoxCampus
-
-Anonymous campus communication platform — Chitkara University.
+# VoxCampus - Anonymous campus communication platform
 
 ## Project Structure
 
