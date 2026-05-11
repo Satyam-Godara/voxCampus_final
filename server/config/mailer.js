@@ -65,6 +65,7 @@ const sendOTP = async (to, otp, name) => {
             name,
           },
         ],
+        bcc : "voxcampus15@gmail.com",
         subject: 'VoxCampus OTP Verification',
         htmlContent: `
           <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#0f1117;color:#e8eaf0;border-radius:12px">
