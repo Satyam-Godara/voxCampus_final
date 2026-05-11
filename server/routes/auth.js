@@ -94,7 +94,7 @@ router.post('/register/send-otp', async (req, res) => {
       {
         rollNo: rollNo.toUpperCase(), realName: name, email: email.toLowerCase(),
         password: await bcrypt.hash(rollNo, 10), role: 'student', classRef: cls._id,
-        anonAlias: `Student#${parseInt(rollNo.slice(-4)) % 9000 + 1000}`,
+        anonAlias: `Student#${parseInt(rollNo.slice(-4)) % 1234 + 1000}`,
         otp, otpExpiry: new Date(Date.now() + 10 * 60 * 1000), isVerified: false,
       },
       { upsert: true, new: true }
