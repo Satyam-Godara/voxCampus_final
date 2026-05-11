@@ -140,7 +140,7 @@ function TeacherRegister({ onBack }) {
       <div style={{background:'var(--amber-bg)',border:'1px solid rgba(245,158,11,0.2)',borderRadius:8,padding:'10px 14px',marginBottom:14,fontSize:12,color:'var(--amber)'}}>
         Teacher ID is <strong>auto-assigned</strong> after verification. No need to create one.
       </div>
-      <div style={grp}><label style={lbl}>Full Name</label><input style={inp} placeholder="Dr. Firstname Lastname" value={form.name} onChange={set('name')} required/></div>
+      <div style={grp}><label style={lbl}>Full Name</label><input style={inp} placeholder="Firstname Lastname" value={form.name} onChange={set('name')} required/></div>
       <div style={grp}><label style={lbl}>College Email</label><input style={inp} type="email" placeholder="name@chitkara.edu.in" value={form.email} onChange={set('email')} required/></div>
       <div style={grp}><label style={lbl}>Department <span style={{color:'var(--text3)',fontWeight:400}}>(optional)</span></label>
         <input style={inp} placeholder="e.g. Computer Science" value={form.department} onChange={set('department')}/>
