@@ -61,17 +61,25 @@ router.post('/teacher-file', auth, (req, res) => {
     return res.status(403).json({ error: 'Teachers only' });
   }
 
-  teacherFileUpload.single('file')(req, res, (err) => {
+  teacherFileUpload.array('file',10)(req, res, (err) => {
     if (err) return res.status(400).json({ error: err.message });
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
     const fileType = getFileType(req.file.mimetype);
-
-    res.json({
-      url:      req.file.path,           // Cloudinary secure HTTPS URL
-      filename: req.file.originalname,
+    const uploadedFiles = req.file.map((file) => ({
+        url: file.path,
+        filename: file.originalname,
+        // fileType: getFileType(file.mimetype),
       fileType,
-    });
+        // public_id: file.filename,
+    }));
+    res.json(uploadedFiles);
+    
+    // res.json({
+    //   url:      req.file.path,           // Cloudinary secure HTTPS URL
+    //   filename: req.file.originalname,
+    //   fileType,
+    // });
   });
 });
 
