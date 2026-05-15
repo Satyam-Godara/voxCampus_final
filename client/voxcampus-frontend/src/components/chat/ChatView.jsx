@@ -160,7 +160,28 @@ function MessageRow({ msg, isAdmin, onDelete }) {
           <span className="message-time">{format(new Date(msg.createdAt), 'HH:mm')}</span>
         </div>
         {msg.content && <div className="message-content">{msg.content}</div>}
-        <FileAttachment msg={msg} />
+        {/* <FileAttachment msg={msg} /> */}
+        {msg.file?.length > 0 && (
+  <div
+    style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 8,
+      marginTop: 8,
+    }}
+  >
+    {msg.file.map((file, index) => (
+      <FileAttachment
+        key={index}
+        msg={{
+          fileUrl: file.fileUrl,
+          fileName: file.fileName,
+          fileType: file.fileType,
+        }}
+      />
+    ))}
+  </div>
+)}
       </div>
       {isAdmin && <button className="message-delete-btn" onClick={() => onDelete(msg._id)}>✕</button>}
     </div>
@@ -179,7 +200,7 @@ export default function ChatView({ channel, socket, isDM = false }) {
   const [annType, setAnnType]             = useState('');
   const [dueDate, setDueDate]             = useState('');
   const [uploading, setUploading]         = useState(false);
-  const [uploadPreview, setUploadPreview] = useState(null);
+  const [uploadPreview, setUploadPreview] = useState();
   const [showPolls, setShowPolls]         = useState(false);
   const bottomRef   = useRef(null);
   const typingTimer = useRef(null);
@@ -233,12 +254,14 @@ export default function ChatView({ channel, socket, isDM = false }) {
 
   // File upload
   const handleFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const file = Arrays.from(e.target.files?.[0]);
+    if (!file.length) return;
     setUploading(true);
     try {
       const fd = new FormData();
+      file.forEach((file) =>{
       fd.append(isTeacher ? 'file' : 'image', file);
+      )};
       const { data } = await api.post(
         isTeacher ? '/upload/teacher-file' : '/upload/post-image',
         fd, { headers: { 'Content-Type': 'multipart/form-data' } }
