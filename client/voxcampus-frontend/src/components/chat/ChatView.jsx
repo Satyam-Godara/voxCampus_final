@@ -735,7 +735,7 @@ export default function ChatView({ channel, socket, isDM = false }) {
                 style={{ fontSize: 15, color: uploadPreview ? 'var(--accent)' : 'var(--text3)', padding: '2px 6px', borderRadius: 6, transition: 'color 150ms' }}>
                 {uploading ? '⟳' : '📎'}
               </button>
-              <input ref={fileRef} type="file" style={{ display: 'none' }}
+              <input ref={fileRef} type="file" multiple style={{ display: 'none' }}
                 accept={isTeacher ? '*/*' : 'image/*'}
                 onChange={handleFileChange} />
 
