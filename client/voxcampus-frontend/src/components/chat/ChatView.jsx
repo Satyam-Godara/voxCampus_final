@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import PollsPanel from '../polls/PollsPanel';
 import { ScreenShareViewer } from '../shared/TeacherProfile';
 
-// ── Helpers ───────────────────────────────────────────────────────────────
+// ── Helpers ──────────────────────────────────────────────────────────────
 function dateLabel(d) {
   const dt = new Date(d);
   if (isToday(dt))     return 'Today';
