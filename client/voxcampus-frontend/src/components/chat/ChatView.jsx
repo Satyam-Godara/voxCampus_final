@@ -170,7 +170,6 @@ function MessageRow({ msg, isAdmin, onDelete }) {
       marginTop: 8,
     }}
   >
-    {msg.file.map((file, index) => (
       <FileAttachment
         key={index}
         msg={{
@@ -179,7 +178,6 @@ function MessageRow({ msg, isAdmin, onDelete }) {
           fileType: file.fileType,
         }}
       />
-    ))}
   </div>
 )}
       </div>
