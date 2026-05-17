@@ -254,14 +254,14 @@ export default function ChatView({ channel, socket, isDM = false }) {
 
   // File upload
   const handleFileChange = async (e) => {
-    const file = Arrays.from(e.target.files?.[0]);
+    const file = e.target.files?.[0];
     if (!file.length) return;
     setUploading(true);
     try {
       const fd = new FormData();
-      file.forEach((file) =>{
+      // file.forEach((file) =>{
       fd.append(isTeacher ? 'file' : 'image', file);
-      )};
+      // )};
       const { data } = await api.post(
         isTeacher ? '/upload/teacher-file' : '/upload/post-image',
         fd, { headers: { 'Content-Type': 'multipart/form-data' } }
