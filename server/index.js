@@ -70,6 +70,7 @@ const app    = express();
 const server = http.createServer(app);
 const allowedOrigins = [
   'https://vox-campus-final-7ah3.vercel.app'
+  // ,'http://localhost:5173'
 ];
 const io = new Server(server, {
   cors: {

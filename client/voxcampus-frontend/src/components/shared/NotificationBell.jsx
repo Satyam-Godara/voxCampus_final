@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import api from '../../utils/api';
 import { useSocket } from '../../context/SocketContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBell } from '@fortawesome/free-solid-svg-icons';
 
 const TYPE_ICON = {
   new_message:    '💬',
@@ -70,7 +72,7 @@ export default function NotificationBell({ onNavigate }) {
   };
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
+    <div ref={ref} style={{position: 'relative' }}>
       <button
         onClick={() => { setOpen(v => !v); if (!open) load(); }}
         style={{
@@ -83,7 +85,8 @@ export default function NotificationBell({ onNavigate }) {
         }}
         title="Notifications"
       >
-        🔔
+        {/* 🔔 */}
+        <FontAwesomeIcon icon={faBell} style={{color: "rgb(205, 192, 74)",}} />
         {/* 🕭 */}
 
         {unread > 0 && (
