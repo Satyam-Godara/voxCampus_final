@@ -163,7 +163,7 @@ export default function FeedView({ channel }) {
       {/* Sort bar */}
       <div className="sort-bar">
         <span style={{fontSize:11,color:'var(--text3)'}}>Sort by</span>
-        {['votes','recent'].map(s=>(
+        {['recent','votes'].map(s=>(
           <button key={s} className={`sort-btn ${sort===s?'active':''}`} onClick={()=>setSort(s)}>
             {s==='votes'?'▲ Top':'◷ Recent'}
           </button>
