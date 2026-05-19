@@ -75,7 +75,7 @@ export default function FeedView({ channel }) {
   const [posts,setPosts]         = useState([]);
   const [loading,setLoading]     = useState(true);
   const [content,setContent]     = useState('');
-  const [sort,setSort]           = useState('votes');
+  const [sort,setSort]           = useState('recent');
   const [posting,setPosting]     = useState(false);
   const [imageUrl,setImageUrl]   = useState(null);
   const [imageName,setImageName] = useState('');
